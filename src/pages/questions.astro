@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const groups = [
+  {name:'Mechanical design & manufacturing',items:['How can mechanical components become lighter without sacrificing too much stiffness?','How should manufacturability influence topology and geometry optimization?','How can additive manufacturing change the way we design mechanical parts?']},
+  {name:'Robotics & intelligent systems',items:['What makes a robotic system reliable outside a controlled laboratory?','How can low-cost sensing and control enable useful automation?','Which manipulation problems are still difficult for practical robots?']},
+  {name:'Science & research',items:['What makes a scientific research laboratory productive?','How do we distinguish an elegant hypothesis from a useful theory?','What makes an experiment convincing and reproducible?']},
+  {name:'Technology & industrial development',items:['How can Togo develop stronger technological and manufacturing capabilities?','How does scientific research move from an idea to a manufactured product?','What institutions help technical knowledge accumulate across generations?']}
+];
+---
+<BaseLayout current="Questions" title="Questions">
+  <div class="eyebrow">OPEN QUESTIONS</div><h1>Questions I want to understand.</h1><p class="lede">A changing research agenda. Some questions may become essays, projects or experiments; others may lead nowhere useful.</p>
+  {groups.map(group => <section><h2>{group.name}</h2><ul>{group.items.map(item => <li style="margin:12px 0;max-width:680px">{item}</li>)}</ul></section>)}
+</BaseLayout>
