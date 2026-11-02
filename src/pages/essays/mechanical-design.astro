@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout current="Essays" title="What Makes a Mechanical Design Better?">
+  <article class="prose">
+    <div class="eyebrow">ENGINEERING · OPEN INVESTIGATION</div><h1>What Makes a Mechanical Design Better?</h1><p class="small-note">An investigation outline, not a conclusion.</p>
+    <p>A mechanical component can be evaluated in many ways: mass, stiffness, strength, fatigue life, cost, ease of manufacture, repairability and reliability.</p>
+    <p>Improving one characteristic can make another worse. Reducing material may lower mass, but it can also increase deformation or create stress concentrations. A design that performs well in a simulation may still be difficult or expensive to manufacture.</p>
+    <h2>A possible investigation</h2><p>Compare two bracket geometries under the same loads and boundary conditions. Examine their mass, maximum stress, deformation and manufacturing constraints.</p>
+    <h2>Questions to answer</h2><ul><li>Which assumptions control the result?</li><li>How sensitive is the model to mesh quality and boundary conditions?</li><li>Does the optimized shape remain practical to manufacture?</li><li>How should simulation results be validated with a physical test?</li></ul>
+    <p class="small-note">Status: exploratory question. Numerical results and conclusions will be added only after analysis and testing.</p>
+  </article>
+</BaseLayout>
