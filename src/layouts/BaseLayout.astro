@@ -1,0 +1,37 @@
+---
+import '../styles/global.css';
+const { title = 'Koami Moïse Agbenowossi', description = 'Research, engineering, technology and progress.', current = 'Home' } = Astro.props;
+const nav = [
+  ['Home','/'],['About','/about/'],['Essays','/essays/'],['Notes','/notes/'],
+  ['Questions','/questions/'],['Projects','/projects/'],['Reading','/reading/'],['Links','/links/']
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#fbfaf7" />
+    <meta name="description" content={description} />
+    <title>{title} — Koami Moïse Agbenowossi</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="site-header">
+        <div class="topline">
+          <a class="wordmark" href="/">KOAMI MOÏSE AGBENOWOSSI</a>
+          <span class="kicker">Research · Engineering · Technology · Progress</span>
+        </div>
+        <nav class="nav" aria-label="Main navigation">
+          {nav.map(([label, href]) => <a class="nav-link" href={href} aria-current={current === label ? 'page' : undefined}>{label}</a>)}
+        </nav>
+      </header>
+      <main><slot /></main>
+      <footer class="site-footer">
+        <span class="footer-meta">© {new Date().getFullYear()} Koami Moïse Agbenowossi</span>
+        <span class="footer-meta">A personal archive of questions, ideas and work in progress.</span>
+      </footer>
+    </div>
+  </body>
+</html>
