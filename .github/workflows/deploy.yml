@@ -1,27 +1,24 @@
 name: Deploy Astro site to GitHub Pages
-
 on:
   push:
     branches: [main]
   workflow_dispatch:
-
 permissions:
   contents: read
   pages: write
   id-token: write
-
 concurrency:
   group: pages
   cancel-in-progress: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-      - name: Build and upload
+      - uses: actions/checkout@v7
+      - name: Build Astro site
         uses: withastro/action@v6
+        with:
+          package-manager: npm@latest
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -29,6 +26,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v5
