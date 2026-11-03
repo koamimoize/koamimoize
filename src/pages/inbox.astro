@@ -83,27 +83,42 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const count = document.querySelector<HTMLSpanElement>('#item-count')!;
   const feedback = document.querySelector<HTMLParagraphElement>('#capture-feedback')!;
 
-  const starterResource: SavedItem = {
-    id: 'mit-cba-classes',
-    title: 'MIT Center for Bits and Atoms — Classes',
-    url: 'https://cba.mit.edu/classes/',
-    note: 'MIT course materials and learning resources on digital fabrication, computation and related technical subjects.',
-    category: 'Research',
-    done: false,
-    created: 1793700000000
-  };
+  const starterResources: SavedItem[] = [
+    {
+      id: 'mit-cba-classes',
+      title: 'MIT Center for Bits and Atoms — Classes',
+      url: 'https://cba.mit.edu/classes/',
+      note: 'MIT course materials and learning resources on digital fabrication, computation and related technical subjects.',
+      category: 'Research',
+      done: false,
+      created: 1793700000000
+    },
+    {
+      id: 'alexey-guzey-tools-gear',
+      title: 'Alexey Guzey — Tools / Gear',
+      url: 'https://guzey.com/tools-gear/',
+      note: 'A personal inventory of tools, software and equipment. The author notes that the recommendations are outdated, so use it as inspiration rather than a current buying guide.',
+      category: 'Read later',
+      done: false,
+      created: 1793720000000
+    }
+  ];
 
   function loadItems(): SavedItem[] {
     try {
       const items: SavedItem[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      if (!items.some(item => item.id === starterResource.id)) {
-        items.push(starterResource);
-        localStorage.setItem(storageKey, JSON.stringify(items));
+      let changed = false;
+      for (const resource of starterResources) {
+        if (!items.some(item => item.id === resource.id)) {
+          items.push(resource);
+          changed = true;
+        }
       }
+      if (changed) localStorage.setItem(storageKey, JSON.stringify(items));
       return items;
     } catch {
-      localStorage.setItem(storageKey, JSON.stringify([starterResource]));
-      return [starterResource];
+      localStorage.setItem(storageKey, JSON.stringify(starterResources));
+      return [...starterResources];
     }
   }
   function saveItems(items: SavedItem[]) { localStorage.setItem(storageKey, JSON.stringify(items)); }
