@@ -24,7 +24,7 @@ function slugFrom(url, title) {
   return title.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 const response = await fetch(FEED_URL, { headers: { 'User-Agent': 'KoamiPersonalSite/1.0' } });
-if (!response.ok) throw new Error(\`Substack RSS returned HTTP \${response.status}\`);
+if (!response.ok) throw new Error(`Substack RSS returned HTTP ${response.status}`);
 const xml = await response.text();
 const items = [...xml.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/g)].map(([, item]) => {
   const title = tag(item, 'title');
@@ -53,4 +53,4 @@ for (const post of items) {
 }
 const merged = [...byId.values()].sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
 await writeFile(OUTPUT, JSON.stringify(merged, null, 2) + '\n');
-console.log(\`Synced \${items.length} feed items; \${merged.length} posts in archive.\`);
+console.log(`Synced ${items.length} feed items; ${merged.length} posts in archive.`);
