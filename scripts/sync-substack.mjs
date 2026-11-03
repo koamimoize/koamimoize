@@ -3,7 +3,7 @@ import { gunzipSync } from 'node:zlib';
 
 const FEED_URL = 'https://koami.substack.com/feed';
 const OUTPUT = 'src/data/substack-posts.json';
-const EXPORT_BACKUP = 'scripts/substack-export.json.gz.b64';
+const EXPORT_PARTS = [1, 2, 3, 4, 5].map((n) => 'scripts/substack-export.part-' + n + '.txt');
 
 function decodeXml(value = '') {
   return value
@@ -61,15 +61,15 @@ function mergePost(post) {
 }
 for (const post of existing) mergePost(post);
 
-// Import the full Substack data export as the durable source of truth.
-// This avoids losing older publications when Substack blocks hosted RSS requests.
+// Import the complete published-post export in ordered, verifiable chunks.
 try {
-  const compressed = await readFile(EXPORT_BACKUP, 'utf8');
-  const exportedPosts = JSON.parse(gunzipSync(Buffer.from(compressed.trim(), 'base64')).toString('utf8'));
+  const chunks = await Promise.all(EXPORT_PARTS.map((path) => readFile(path, 'utf8')));
+  const exportedPosts = JSON.parse(gunzipSync(Buffer.from(chunks.join('').trim(), 'base64')).toString('utf8'));
   for (const post of exportedPosts) mergePost({ ...post, source: 'substack-export' });
   console.log('Loaded ' + exportedPosts.length + ' published posts from the Substack export.');
 } catch (error) {
-  console.log('No readable Substack export backup: ' + error.message);
+  console.log('Substack export import failed: ' + error.message);
+  throw error;
 }
 
 // Try RSS for newer posts. Substack may return 403 to hosted runners; the export remains intact.
