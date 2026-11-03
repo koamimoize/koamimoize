@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import posts from '../../data/substack-posts.json';
+
+const sortedPosts = [...posts].sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+const dateLabel = (value) => value ? new Date(value).toLocaleDateString('en', { year: 'numeric', month: 'long', day: 'numeric' }) : 'DATE NOT AVAILABLE';
+---
+<BaseLayout current="Writing" title="Writing Archive" description="Articles published on Koami’s Substack, collected in one personal archive.">
+  <div class="eyebrow">PUBLIC WRITING · SUBSTACK MIRROR</div>
+  <h1>Writing Archive</h1>
+  <p class="lede">A growing archive of essays and ideas published on Substack. Substack remains the original place of publication; this page keeps a searchable home for the writing.</p>
+  <p class="small-note"><a href="https://koami.substack.com" target="_blank" rel="noreferrer">Visit Koami’s Substack ↗</a> · <a href="https://koami.substack.com/feed" target="_blank" rel="noreferrer">RSS feed ↗</a></p>
+  {sortedPosts.length ? sortedPosts.map((post) => (
+    <article class="entry">
+      <div class="entry-date">{dateLabel(post.publishedAt)}</div>
+      <div>
+        <a class="entry-title" href={post.url} target="_blank" rel="noreferrer">{post.title}</a>
+        {post.description && <p>{post.description}</p>}
+        <p class="small-note"><a href={post.url} target="_blank" rel="noreferrer">Read the original on Substack ↗</a></p>
+      </div>
+    </article>
+  )) : <p class="small-note">The archive is waiting for its first RSS sync. New public posts will appear here automatically.</p>}
+  <p class="small-note" style="margin-top:36px">This automatic feed currently covers the posts exposed by Substack’s RSS feed. The full historical archive can be added from a Substack data export.</p>
+</BaseLayout>
