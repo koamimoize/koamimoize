@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout current="Knowledge" title="Knowledge Library" description="A working library of resources, questions, research directions and ideas to build.">
+  <div class="eyebrow">A PERSONAL KNOWLEDGE SYSTEM</div>
+  <h1>Knowledge Library</h1>
+  <p class="lede">A place to connect what I read, what I think, what I want to investigate and what I might build.</p>
+  <div class="prose intro">
+    <p>Knowledge becomes more useful when it leaves a trace. A book should lead to a question. A paper should suggest an experiment. An idea should eventually meet reality.</p>
+    <p>This library is a working map, not a list of accomplishments. Some entries are starting points; others will become notes, hypotheses, prototypes or research projects.</p>
+  </div>
+  <section class="knowledge-section">
+    <div class="section-index">01 / READ</div><div class="section-content">
+      <h2>Read</h2><p>Books, essays, courses, lectures and papers worth spending time with. The goal is not to collect links, but to understand the ideas behind them.</p>
+      <div class="resource"><a href="https://guzey.com/" target="_blank" rel="noopener noreferrer">Alexey Guzey — Essays, research and notes ↗</a><p>A broad collection spanning science, technology, research, education and progress.</p></div>
+      <div class="resource"><a href="https://cba.mit.edu/classes/" target="_blank" rel="noopener noreferrer">MIT Center for Bits and Atoms — Classes ↗</a><p>Course materials connected to digital fabrication, computation and the relationship between bits and atoms.</p></div>
+      <div class="resource"><a href="https://andzuck.com/" target="_blank" rel="noopener noreferrer">Andrej Karpathy — Website and writing ↗</a><p>A starting point for exploring ideas around technology, intelligence and learning.</p></div>
+      <a class="text-link" href="/reading/">Open reading notes →</a>
+    </div>
+  </section>
+  <section class="knowledge-section">
+    <div class="section-index">02 / THINK</div><div class="section-content">
+      <h2>Think</h2><p>Questions, observations, arguments and hypotheses that deserve more thought. These are not conclusions; they are ideas to examine and improve.</p>
+      <ul><li>What makes a complex system understandable?</li><li>How can scientific knowledge become practical engineering capability?</li><li>What conditions allow a small research laboratory to produce useful breakthroughs?</li><li>Can beautiful design and technical efficiency reinforce one another?</li></ul>
+      <a class="text-link" href="/questions/">Explore open questions →</a>
+    </div>
+  </section>
+  <section class="knowledge-section">
+    <div class="section-index">03 / RESEARCH</div><div class="section-content">
+      <h2>Research</h2><p>Topics to investigate through papers, technical literature, calculations and experiments. Each research note should state the question, evidence, methods, limitations and next steps.</p>
+      <div class="topic-list"><span>Materials science</span><span>Coatings & corrosion</span><span>Mechanical design</span><span>Advanced manufacturing</span><span>Robotics</span><span>Control systems</span><span>Industrial systems</span></div>
+      <p class="small-note">A research direction becomes stronger when it can be expressed as a precise question that evidence could answer.</p>
+    </div>
+  </section>
+  <section class="knowledge-section">
+    <div class="section-index">04 / BUILD</div><div class="section-content">
+      <h2>Build</h2><p>Ideas that could become models, prototypes, tools, experiments or useful systems. Building is a way to test whether an idea survives contact with reality.</p>
+      <div class="resource"><strong>Robotics & Innovation Laboratory</strong><p>Explore what a practical research and experimentation space could look like: equipment, capabilities, projects, collaborators and a path from learning to making.</p></div>
+      <div class="resource"><strong>Industrial Engineering Lab</strong><p>Turn industrial problems into measurable improvements through diagnosis, design, maintenance and process understanding.</p></div>
+      <a class="text-link" href="/projects/">See projects in progress →</a>
+    </div>
+  </section>
+  <div class="closing-note"><strong>A simple rule</strong><p>For every important thing I read, try to leave one useful trace: a summary, a question, a connection, an experiment or an idea worth testing.</p></div>
+</BaseLayout>
+<style>
+.intro{max-width:720px;margin:28px 0 54px}.knowledge-section{display:grid;grid-template-columns:145px minmax(0,1fr);gap:34px;padding:30px 0;border-top:1px solid var(--line)}.section-index{font:10px 'DM Mono',monospace;letter-spacing:.09em;color:var(--muted);padding-top:9px}.section-content{max-width:690px}.section-content h2{font:30px 'Literata',Georgia,serif;font-weight:400;margin:0 0 10px}.section-content>p{font-size:14px;color:var(--muted);line-height:1.8;margin:0 0 20px}.resource{padding:15px 0;border-top:1px solid var(--line)}.resource a,.resource strong{font:16px 'Literata',Georgia,serif;color:var(--ink);text-decoration:none}.resource a:hover{color:var(--accent)}.resource p{font-size:13px;color:var(--muted);line-height:1.7;margin:6px 0 0}.section-content ul{padding-left:19px;color:var(--ink);font-size:14px;line-height:2}.topic-list{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}.topic-list span{border:1px solid var(--line);padding:7px 10px;font:10px 'DM Mono',monospace;color:var(--muted)}.small-note{font-size:12px;color:var(--muted);line-height:1.7}.closing-note{margin:35px 0 10px;padding:22px 24px;border-left:2px solid var(--accent);background:#f3f0e9;max-width:720px}.closing-note strong{font:17px 'Literata',Georgia,serif;font-weight:400}.closing-note p{font-size:13px;line-height:1.7;color:var(--muted);margin:7px 0 0}@media(max-width:600px){.knowledge-section{grid-template-columns:1fr;gap:8px;padding:24px 0}.section-index{padding:0}.section-content h2{font-size:27px}}
+</style>
