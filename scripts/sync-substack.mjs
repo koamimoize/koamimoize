@@ -1,7 +1,9 @@
 import { readFile, writeFile } from 'node:fs/promises';
+import { gunzipSync } from 'node:zlib';
 
 const FEED_URL = 'https://koami.substack.com/feed';
 const OUTPUT = 'src/data/substack-posts.json';
+const EXPORT_BACKUP = 'scripts/substack-export.json.gz.b64';
 
 function decodeXml(value = '') {
   return value
@@ -37,52 +39,68 @@ function hasBody(html = '') {
   return Boolean(html && html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim());
 }
 
-const response = await fetch(FEED_URL, { headers: { 'User-Agent': 'KoamiPersonalSite/1.0' } });
-if (!response.ok) throw new Error('Substack RSS returned HTTP ' + response.status);
-const xml = await response.text();
-const items = [...xml.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/g)].map(([, item]) => {
-  const title = tag(item, 'title');
-  const url = canonicalUrl(tag(item, 'link'));
-  const content = tag(item, 'content:encoded') || tag(item, 'description');
-  const description = tag(item, 'description').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-  const rawDate = tag(item, 'pubDate');
-  const date = rawDate ? new Date(rawDate).toISOString() : '';
-  return {
-    id: url,
-    slug: slugFrom(url, title),
-    title,
-    url,
-    publishedAt: date,
-    description: description.slice(0, 320),
-    contentHtml: content,
-    contentAvailable: hasBody(content),
-    source: 'substack-rss'
-  };
-}).filter(post => post.title && post.url);
-
-if (!items.length) throw new Error('No posts found in the Substack RSS feed; keeping the existing archive unchanged.');
-
 let existing = [];
 try { existing = JSON.parse(await readFile(OUTPUT, 'utf8')); } catch {}
-// Merge by canonical publication URL, not by the export's internal ID.
-// This prevents an exported post and its RSS version from appearing twice.
 const byUrl = new Map();
-for (const post of existing) {
+function mergePost(post) {
   const key = canonicalUrl(post.url || post.id);
-  if (!key) continue;
-  byUrl.set(key, { ...post, id: key, url: key });
-}
-for (const post of items) {
-  const key = canonicalUrl(post.url);
+  if (!key) return;
   const previous = byUrl.get(key);
-  byUrl.set(key, previous ? {
-    ...previous,
+  const incomingHasBody = hasBody(post.contentHtml);
+  const previousHasBody = hasBody(previous?.contentHtml);
+  byUrl.set(key, {
+    ...(previous || {}),
     ...post,
-    description: post.description || previous.description || '',
-    contentHtml: hasBody(post.contentHtml) ? post.contentHtml : (previous.contentHtml || ''),
-    contentAvailable: hasBody(post.contentHtml) || Boolean(previous.contentAvailable)
-  } : post);
+    id: key,
+    url: key,
+    slug: post.slug || previous?.slug || slugFrom(key, post.title || previous?.title || ''),
+    description: post.description || previous?.description || '',
+    contentHtml: incomingHasBody ? post.contentHtml : (previous?.contentHtml || ''),
+    contentAvailable: incomingHasBody || previousHasBody || Boolean(previous?.contentAvailable)
+  });
 }
+for (const post of existing) mergePost(post);
+
+// Import the full Substack data export as the durable source of truth.
+// This avoids losing older publications when Substack blocks hosted RSS requests.
+try {
+  const compressed = await readFile(EXPORT_BACKUP, 'utf8');
+  const exportedPosts = JSON.parse(gunzipSync(Buffer.from(compressed.trim(), 'base64')).toString('utf8'));
+  for (const post of exportedPosts) mergePost({ ...post, source: 'substack-export' });
+  console.log('Loaded ' + exportedPosts.length + ' published posts from the Substack export.');
+} catch (error) {
+  console.log('No readable Substack export backup: ' + error.message);
+}
+
+// Try RSS for newer posts. Substack may return 403 to hosted runners; the export remains intact.
+try {
+  const response = await fetch(FEED_URL, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; KoamiPersonalSite/1.0)' } });
+  if (!response.ok) throw new Error('HTTP ' + response.status);
+  const xml = await response.text();
+  const items = [...xml.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/g)].map(([, item]) => {
+    const title = tag(item, 'title');
+    const url = canonicalUrl(tag(item, 'link'));
+    const content = tag(item, 'content:encoded') || tag(item, 'description');
+    const description = tag(item, 'description').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    const rawDate = tag(item, 'pubDate');
+    return {
+      id: url,
+      slug: slugFrom(url, title),
+      title,
+      url,
+      publishedAt: rawDate ? new Date(rawDate).toISOString() : '',
+      description: description.slice(0, 320),
+      contentHtml: content,
+      contentAvailable: hasBody(content),
+      source: 'substack-rss'
+    };
+  }).filter(post => post.title && post.url);
+  for (const post of items) mergePost(post);
+  console.log('Imported ' + items.length + ' published RSS entries.');
+} catch (error) {
+  console.log('RSS unavailable (' + error.message + '); keeping the full export archive.');
+}
+
 const merged = [...byUrl.values()].sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0));
 await writeFile(OUTPUT, JSON.stringify(merged, null, 2) + '\n');
-console.log('Imported ' + items.length + ' published RSS posts; archive now contains ' + merged.length + ' unique published posts.');
+console.log('Writing archive contains ' + merged.length + ' unique published posts.');
