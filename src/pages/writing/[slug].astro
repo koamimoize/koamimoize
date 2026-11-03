@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import posts from '../../data/substack-posts.json';
+
+export function getStaticPaths() {
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post }
+  }));
+}
+const { post } = Astro.props;
+const dateLabel = post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('en', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+---
+<BaseLayout current="Writing" title={post.title} description={post.description || post.title}>
+  <article>
+    <div class="eyebrow">FROM KOAMI’S SUBSTACK · {dateLabel}</div>
+    <h1>{post.title}</h1>
+    <p class="small-note"><a href={post.url} target="_blank" rel="noreferrer">View original publication on Substack ↗</a></p>
+    <div class="prose" set:html={post.contentHtml} />
+    <p class="small-note" style="margin-top:48px"><a href="/writing/">← Back to Writing Archive</a></p>
+  </article>
+</BaseLayout>
