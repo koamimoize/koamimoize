@@ -83,8 +83,28 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const count = document.querySelector<HTMLSpanElement>('#item-count')!;
   const feedback = document.querySelector<HTMLParagraphElement>('#capture-feedback')!;
 
+  const starterResource: SavedItem = {
+    id: 'mit-cba-classes',
+    title: 'MIT Center for Bits and Atoms — Classes',
+    url: 'https://cba.mit.edu/classes/',
+    note: 'MIT course materials and learning resources on digital fabrication, computation and related technical subjects.',
+    category: 'Research',
+    done: false,
+    created: 1793700000000
+  };
+
   function loadItems(): SavedItem[] {
-    try { return JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch { return []; }
+    try {
+      const items: SavedItem[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      if (!items.some(item => item.id === starterResource.id)) {
+        items.push(starterResource);
+        localStorage.setItem(storageKey, JSON.stringify(items));
+      }
+      return items;
+    } catch {
+      localStorage.setItem(storageKey, JSON.stringify([starterResource]));
+      return [starterResource];
+    }
   }
   function saveItems(items: SavedItem[]) { localStorage.setItem(storageKey, JSON.stringify(items)); }
   function render() {
