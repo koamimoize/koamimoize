@@ -1,0 +1,136 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout current="Inbox" title="Ideas & Links Inbox" description="A private capture space for links, ideas and research to revisit.">
+  <div class="eyebrow">PERSONAL KNOWLEDGE INBOX</div>
+  <h1>Save it now. Explore it later.</h1>
+  <p class="lede">A place to capture interesting links, unfinished thoughts, research papers and things worth coming back to.</p>
+
+  <form id="capture-form" class="capture-form">
+    <label for="capture-title">Title or idea</label>
+    <input id="capture-title" name="title" required maxlength="180" placeholder="What do you want to remember?" />
+    <label for="capture-url">Link <span class="optional">(optional for ideas)</span></label>
+    <input id="capture-url" name="url" type="url" placeholder="https://..." />
+    <label for="capture-note">Why is it interesting? <span class="optional">(optional)</span></label>
+    <textarea id="capture-note" name="note" rows="3" maxlength="1000" placeholder="A short note to remember why you saved this..."></textarea>
+    <div class="capture-controls">
+      <div class="capture-category">
+        <label for="capture-category">Category</label>
+        <select id="capture-category" name="category">
+          <option>Read later</option><option>Ideas</option><option>Research</option><option>Projects</option><option>Watch later</option><option>Other</option>
+        </select>
+      </div>
+      <button type="submit">＋ Save to inbox</button>
+    </div>
+    <p id="capture-feedback" class="small-note" aria-live="polite"></p>
+  </form>
+
+  <div class="inbox-heading">
+    <div><div class="eyebrow">YOUR COLLECTION</div><h2>Captured items <span id="item-count" class="count">0</span></h2></div>
+    <select id="filter-category" aria-label="Filter by category">
+      <option value="All">All categories</option><option>Read later</option><option>Ideas</option><option>Research</option><option>Projects</option><option>Watch later</option><option>Other</option>
+    </select>
+  </div>
+  <div id="inbox-list" class="inbox-list">
+    <div class="empty-state"><strong>Your inbox is empty.</strong><p>Save your first link or idea above. It will appear here.</p></div>
+  </div>
+  <p class="small-note inbox-footnote">Your collection is saved in this browser on this device. It is not synced to GitHub or other devices. Export or cloud sync can be added later.</p>
+</BaseLayout>
+
+<style>
+  .capture-form{max-width:700px;margin:36px 0 58px;padding:26px;border:1px solid var(--line);background:#fffefa}
+  .capture-form label,.capture-category label{display:block;font:11px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:0 0 7px}
+  .capture-form input,.capture-form textarea,.capture-form select,.inbox-heading select{width:100%;border:1px solid var(--line);border-radius:2px;background:var(--paper);padding:12px 13px;font:14px 'DM Sans',sans-serif;color:var(--ink);margin:0 0 17px}
+  .capture-form textarea{resize:vertical}
+  .optional{font-family:'DM Sans',sans-serif;text-transform:none;letter-spacing:0}
+  .capture-controls{display:flex;align-items:end;justify-content:space-between;gap:16px}
+  .capture-category{width:48%}
+  .capture-category select{margin-bottom:0}
+  .capture-form button{border:0;background:var(--ink);color:white;padding:13px 18px;font:12px 'DM Mono',monospace;cursor:pointer}
+  .capture-form button:hover{background:var(--accent)}
+  .capture-form #capture-feedback{margin:12px 0 0;min-height:1em}
+  .inbox-heading{display:flex;align-items:end;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line);padding-bottom:12px}
+  .inbox-heading h2{margin:5px 0 0;font-size:25px}
+  .count{font:12px 'DM Mono',monospace;color:var(--muted)}
+  .inbox-heading select{width:auto;min-width:145px;margin:0}
+  .inbox-list{max-width:760px}
+  .inbox-item{display:grid;grid-template-columns:1fr auto;gap:18px;padding:19px 0;border-bottom:1px solid var(--line)}
+  .item-meta{font:10px 'DM Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+  .item-title{font:20px 'Literata',Georgia,serif;overflow-wrap:anywhere}
+  .item-title a{text-decoration:none}
+  .item-note{font-size:13px;color:var(--muted);margin:7px 0 0;white-space:pre-wrap}
+  .item-actions{display:flex;gap:10px;align-items:start}
+  .item-actions button{background:none;border:0;padding:3px 0;color:var(--muted);font:11px 'DM Mono',monospace;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  .item-actions button:hover{color:var(--accent)}
+  .inbox-item.is-done .item-title,.inbox-item.is-done .item-note{text-decoration:line-through;color:#96938b}
+  .empty-state{padding:30px 0;color:var(--muted)}
+  .empty-state strong{font:19px 'Literata',Georgia,serif;color:var(--ink);font-weight:400}
+  .empty-state p{font-size:13px;margin:5px 0}
+  .inbox-footnote{margin-top:24px}
+  @media(max-width:600px){.capture-form{padding:18px}.capture-controls{align-items:stretch;flex-direction:column}.capture-category{width:100%}.capture-form button{width:100%}.inbox-heading{align-items:start;flex-direction:column}.inbox-heading select{width:100%}.inbox-item{grid-template-columns:1fr;gap:9px}.item-actions{justify-content:flex-end}}
+</style>
+
+<script>
+  type SavedItem = { id: string; title: string; url: string; note: string; category: string; done: boolean; created: number };
+  const storageKey = 'koami-personal-inbox-v1';
+  const form = document.querySelector<HTMLFormElement>('#capture-form')!;
+  const titleInput = document.querySelector<HTMLInputElement>('#capture-title')!;
+  const urlInput = document.querySelector<HTMLInputElement>('#capture-url')!;
+  const noteInput = document.querySelector<HTMLTextAreaElement>('#capture-note')!;
+  const categoryInput = document.querySelector<HTMLSelectElement>('#capture-category')!;
+  const filter = document.querySelector<HTMLSelectElement>('#filter-category')!;
+  const list = document.querySelector<HTMLDivElement>('#inbox-list')!;
+  const count = document.querySelector<HTMLSpanElement>('#item-count')!;
+  const feedback = document.querySelector<HTMLParagraphElement>('#capture-feedback')!;
+
+  function loadItems(): SavedItem[] {
+    try { return JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch { return []; }
+  }
+  function saveItems(items: SavedItem[]) { localStorage.setItem(storageKey, JSON.stringify(items)); }
+  function render() {
+    const all = loadItems();
+    const items = filter.value === 'All' ? all : all.filter(item => item.category === filter.value);
+    count.textContent = String(all.length);
+    list.replaceChildren();
+    if (!items.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      const strong = document.createElement('strong');
+      strong.textContent = all.length ? 'Nothing in this category yet.' : 'Your inbox is empty.';
+      const p = document.createElement('p');
+      p.textContent = all.length ? 'Choose another category to see your saved items.' : 'Save your first link or idea above. It will appear here.';
+      empty.append(strong, p); list.append(empty); return;
+    }
+    items.sort((a,b) => b.created - a.created).forEach(item => {
+      const article = document.createElement('article');
+      article.className = 'inbox-item' + (item.done ? ' is-done' : '');
+      const content = document.createElement('div');
+      const meta = document.createElement('div'); meta.className = 'item-meta';
+      meta.textContent = item.category + ' · ' + new Date(item.created).toLocaleDateString();
+      const heading = document.createElement('div'); heading.className = 'item-title';
+      if (item.url) {
+        const a = document.createElement('a'); a.href = item.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = item.title; heading.append(a);
+      } else heading.textContent = item.title;
+      content.append(meta, heading);
+      if (item.note) { const note = document.createElement('p'); note.className = 'item-note'; note.textContent = item.note; content.append(note); }
+      const actions = document.createElement('div'); actions.className = 'item-actions';
+      const done = document.createElement('button'); done.type = 'button'; done.textContent = item.done ? 'Reopen' : 'Done';
+      done.addEventListener('click', () => { const current = loadItems(); const target = current.find(x => x.id === item.id); if (target) target.done = !target.done; saveItems(current); render(); });
+      const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Delete';
+      remove.addEventListener('click', () => { saveItems(loadItems().filter(x => x.id !== item.id)); render(); });
+      actions.append(done, remove); article.append(content, actions); list.append(article);
+    });
+  }
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    const title = titleInput.value.trim();
+    let url = urlInput.value.trim();
+    if (!title) return;
+    if (url && !/^https?:\/\//i.test(url)) { feedback.textContent = 'Please use a complete http or https link.'; return; }
+    const items = loadItems();
+    items.push({ id: crypto.randomUUID(), title, url, note: noteInput.value.trim(), category: categoryInput.value, done: false, created: Date.now() });
+    saveItems(items); form.reset(); feedback.textContent = 'Saved to your inbox.'; render(); titleInput.focus();
+  });
+  filter.addEventListener('change', render);
+  render();
+</script>
