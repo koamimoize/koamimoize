@@ -53,4 +53,4 @@ for (const post of items) {
 }
 const merged = [...byId.values()].sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
 await writeFile(OUTPUT, JSON.stringify(merged, null, 2) + '\n');
-console.log(`Synced ${items.length} feed items; ${merged.length} posts in archive.`);
+console.log(`Synced ${items.length} RSS entries; archive contains ${merged.length} published posts.`);
