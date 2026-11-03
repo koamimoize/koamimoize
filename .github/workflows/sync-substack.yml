@@ -1,0 +1,36 @@
+name: Sync Substack archive
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: substack-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Fetch latest Substack posts
+        run: node scripts/sync-substack.mjs
+      - name: Commit archive updates
+        run: |
+          if git diff --quiet -- src/data/substack-posts.json; then
+            echo "No new Substack content."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/substack-posts.json
+          git commit -m "Sync latest Substack posts"
+          git push
