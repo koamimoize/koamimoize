@@ -26,7 +26,7 @@ function slugFrom(url, title) {
 const response = await fetch(FEED_URL, { headers: { 'User-Agent': 'KoamiPersonalSite/1.0' } });
 if (!response.ok) throw new Error(`Substack RSS returned HTTP ${response.status}`);
 const xml = await response.text();
-const items = [...xml.matchAll(/<item(?:\\s[^>]*)?>([\\s\\S]*?)<\\/item>/g)].map(([, item]) => {
+const items = [...xml.matchAll(/<item\\b[^>]*>([\\s\\S]*?)<\\/item>/g)].map(([, item]) => {
   const title = tag(item, 'title');
   const url = tag(item, 'link');
   const content = tag(item, 'content:encoded') || tag(item, 'description');
