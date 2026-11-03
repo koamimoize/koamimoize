@@ -1,5 +1,8 @@
 name: Sync Substack archive
 on:
+  push:
+    paths:
+      - 'scripts/sync-substack.mjs'
   schedule:
     - cron: '17 * * * *'
   workflow_dispatch:
