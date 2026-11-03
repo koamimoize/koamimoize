@@ -13,7 +13,7 @@ function decodeXml(value = '') {
 }
 function tag(xml, name) {
   const escaped = name.replace(':', '\\:');
-  const match = xml.match(new RegExp('<' + escaped + '(?:\s[^>]*)?>([\s\S]*?)<\/' + escaped + '>'));
+  const match = xml.match(new RegExp('<' + escaped + '(?:\\s[^>]*)?>([\\s\\S]*?)</' + escaped + '>'));
   return match ? decodeXml(match[1]).trim() : '';
 }
 function slugFrom(url, title) {
