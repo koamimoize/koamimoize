@@ -17,16 +17,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - name: Build Astro site
-        uses: withastro/action@v6
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          package-manager: npm@latest
-      - name: Upload uniquely named Pages artifact
-        uses: actions/upload-pages-artifact@v4
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Build site for the root domain
+        run: npm run build
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: dist
-          name: astro-pages
 
   deploy:
     needs: build
@@ -37,6 +43,4 @@ jobs:
     steps:
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v5
-        with:
-          artifact_name: astro-pages
+        uses: actions/deploy-pages@v4
