@@ -32,14 +32,14 @@ const items = [...xml.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/g)].map(([, item
   const content = tag(item, 'content:encoded') || tag(item, 'description');
   const description = tag(item, 'description').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
   return {
-    id: tag(item, 'guid') || url,
+    id: url,
     slug: slugFrom(url, title),
     title,
     url,
     publishedAt: tag(item, 'pubDate'),
     description: description.slice(0, 320),
     contentHtml: content,
-    syncedAt: new Date().toISOString()
+    contentAvailable: Boolean(content && content.replace(/<[^>]*>/g, '').trim())
   };
 }).filter(post => post.title && post.url);
 
@@ -49,7 +49,7 @@ try { existing = JSON.parse(await readFile(OUTPUT, 'utf8')); } catch {}
 const byId = new Map(existing.map(post => [post.id, post]));
 for (const post of items) {
   const previous = byId.get(post.id);
-  byId.set(post.id, previous ? { ...previous, ...post } : post);
+  byId.set(post.id, previous ? { ...previous, ...post, contentHtml: (post.contentHtml && post.contentHtml.replace(/<[^>]*>/g, '').trim()) ? post.contentHtml : previous.contentHtml, contentAvailable: Boolean((post.contentHtml && post.contentHtml.replace(/<[^>]*>/g, '').trim()) || previous.contentAvailable) } : post);
 }
 const merged = [...byId.values()].sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
 await writeFile(OUTPUT, JSON.stringify(merged, null, 2) + '\n');
