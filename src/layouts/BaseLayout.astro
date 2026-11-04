@@ -1,9 +1,10 @@
 ---
 import '../styles/global.css';
 const { title = 'Koami Moïse Agbenowossi', description = 'Research, engineering, technology and progress.', current = 'Home' } = Astro.props;
+const site = 'https://koamimoize.github.io';
 const nav = [
-  ['Home','/'],['About','/about/'],['Essays','/essays/'],['Notes','/notes/'],
-  ['Questions','/questions/'],['Projects','/projects/'],['Reading','/reading/'],['Knowledge','/knowledge/'],['NASA Research','/nasa-research/'],['Writing','/writing/'],['Inbox','/inbox/'],['Links','/links/']
+  ['Home',`${site}/`],['About',`${site}/about/`],['Essays',`${site}/essays/`],['Notes',`${site}/notes/`],
+  ['Questions',`${site}/questions/`],['Projects',`${site}/projects/`],['Reading',`${site}/reading/`],['Knowledge',`${site}/knowledge/`],['NASA Research',`${site}/nasa-research/`],['Writing',`${site}/writing/`],['Inbox',`${site}/inbox/`],['Links',`${site}/links/`]
 ];
 ---
 <!doctype html>
@@ -14,13 +15,13 @@ const nav = [
     <meta name="theme-color" content="#fbfaf7" />
     <meta name="description" content={description} />
     <title>{title} — Koami Moïse Agbenowossi</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={`${site}/favicon.svg`} />
   </head>
   <body>
     <div class="site-shell">
       <header class="site-header">
         <div class="topline">
-          <a class="wordmark" href="/">KOAMI MOÏSE AGBENOWOSSI</a>
+          <a class="wordmark" href={site}>KOAMI MOÏSE AGBENOWOSSI</a>
           <span class="kicker">Research · Engineering · Technology · Progress</span>
         </div>
         <nav class="nav" aria-label="Main navigation">
